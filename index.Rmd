@@ -17,7 +17,7 @@ DANE -  https://sitios.dane.gov.co/ipc/visorIPC/#!/
 
 # **Herramientas utilizadas**
 
-Para la publicación del libro Bookdown, se utiliza R-Studio como software editor e intermediario entre el repositorio creado en GitHuB que a su vez permite la publicación del libro mediante un enlace web.
+Para la publicación del libro Bookdown, se utiliza R-Studio como software editor e intermediario entre el repositorio creado en GitHub que a su vez permite la publicación del libro mediante un enlace web.
 
 # **Carga de los datos**
 
