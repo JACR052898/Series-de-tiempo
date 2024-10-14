@@ -1,6 +1,6 @@
 --- 
 title: "Propuesta series de tiempo"
-author: "Jhony Alejandro Cardenas Rojas, Luis Guillermo Mojica, Isabel Fernández Acosta"
+author: "Jhony Alejandro Cardenas Rojas, Luis  Cortés  Mojica, Isabel Fernández Acosta"
 date: "`r Sys.Date()`"
 site: null
 documentclass: book
