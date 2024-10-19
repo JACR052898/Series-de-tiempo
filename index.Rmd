@@ -2,8 +2,11 @@
 title: "Propuesta series de tiempo"
 author: "Jhony Alejandro Cardenas Rojas, Luis  Cortés  Mojica, Isabel Fernández Acosta"
 date: "`r Sys.Date()`"
-site: null
+output:
+  html_document:
+    df_print: paged
 documentclass: book
+site: null
 ---
 
 
@@ -24,12 +27,20 @@ Para la publicación del libro Bookdown, se utiliza R-Studio como software edito
 Inicialmente se carga la base de datos que contiene la variable a estudiar.A continuación se muestra una breve visualización de la data.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
-Data<-read.csv("Datos.csv")
+data <- read.csv(file = "Datos.csv", header = TRUE, sep = ",", fill = TRUE)
 ```
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 library(dplyr)
-glimpse(Data)
+library(ggplot2)
+library(forecast)
+library(zoo)
+library(grid)
+library(plotly)
+```
+
+```{r}
+glimpse(data)
 ```
 # **Descripción de la base de datos**
 
@@ -44,3 +55,140 @@ Resumen_variables<-data.frame(
   )
 print(Resumen_variables)
 ```
+
+# **Pre-procesamiento de datos**
+
+Después del cargue y análisis descriptivo de la información, se identificó que los tipos de datos estaban incorrectos, pues eran de tipo caracter y se esperaba que fueran tipo fecha y numérico. Adicionalmente, se observan otras variables que no se van a utilizar durante el desarrollo de este proyecto, por consiguiente se procede a eliminarlas a traves del siguiente codigo:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+data <- data[ , -c(3:7)]
+```
+
+También se observo que las variables tenian un nombre inadecuado, por lo tanto, se procede a renombrar las variables.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+colnames(data)<-c("Tiempo","IPC")
+```
+
+Posteriormente, se hace preprocesamiento de las variables, para poder convertir la data en serie de tiempo. Los cambios que se le aplicaron a los  datos fueron:
+
+-Se convierte la variable Tiempo a formato Fecha.
+-Se elimina el caracter % de la variable IPC.
+-Se cambia la "," por "." como separador de decimales.
+-Se convierte la variable IPC a tipo numérica.
+-Se eliminan datos faltantes en ambas variables.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Convertir la columna "Tiempo" a formato de fecha
+data$Tiempo <- as.Date(data$Tiempo, format = "%d/%m/%Y")
+
+# Remover el símbolo de porcentaje y reemplazar comas por puntos
+data$IPC <- gsub("%", "", data$IPC)  # Eliminar '%'
+data$IPC <- gsub(",", ".", data$IPC) # Reemplazar ',' por '.'
+
+# Convertir a numérico y dividir entre 100 para obtener el valor decimal
+data$IPC <- as.numeric(data$IPC) / 100
+
+# eliminar faltantes
+data <- data[!is.na(data$Tiempo) & !is.na(data$IPC), ] 
+```
+
+Después, se convierte la data en tipo serie de tiempo mediante la funcion ts. A continuación, se puede ver como los datos quedaron organizados en una matriz donde las filas son años y las columnas meses y el dato correspondiente se encuentra en el cruce de ambas.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+min_Tiempo <- min(data$Tiempo, na.rm = TRUE) #encontrar el minimo de la variable mes
+#convertir los datos en serie de tiempo
+Indice_ts <- ts(data$IPC, start = c(as.numeric(format(min_Tiempo, "%Y")), as.numeric(format(min_Tiempo, "%m"))), frequency = 12)
+print(Indice_ts) # imprimir datos
+```
+
+Luego de convertir los datos en serie de tiempo se realiza su descomposición para identificar los componenentes principales de la serie como la tendencia, estacionalidad y componente aleatorio (Residuos).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Descomponer la serie
+  descomposicion <- decompose(Indice_ts)
+```
+
+# **visualización de la serie de tiempo y sus componentes**
+
+## **Promedio móvil**
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# media móvil con k= periodo= 12
+data$PromedioMovil <- rollmean(data$IPC, k = 12, fill = NA, align = "right") 
+
+# Grafica promedio móvil
+g1<- ggplot(data, aes(x = Tiempo)) +
+  geom_line(aes(y = IPC, color = "IPC"), size = 0.8) +
+  geom_line(aes(y = PromedioMovil, color = "Promedio Móvil"), size = 0.8) +
+  labs(title = paste("Promedio Móvil de IPC (Ventana =", 12, "meses)"),
+       x = "Fecha", y = "IPC", color = "Leyenda") +
+  theme_minimal()
+ggplotly(g1)
+```
+
+La gráfica muestra dos series que representan la evolución del Índice de Precios al Consumidor (IPC) y su promedio móvil a lo largo del tiempo. A continuación, algunas interpretaciones:
+
+- Línea Roja (IPC): Esta línea representa los valores reales del IPC a lo largo del tiempo. Se puede observar que hay periodos de alta volatilidad con picos y caídas pronunciadas, lo que sugiere momentos de alta inflación seguidos de desaceleraciones.
+
+- Línea Azul (Promedio Móvil): El promedio móvil suaviza las fluctuaciones del IPC al promediar los valores de los 12 meses anteriores. Esto ayuda a identificar las tendencias generales a largo plazo y elimina el "ruido" de las fluctuaciones mensuales. Por ejemplo, se pueden ver tendencias sostenidas de aumento o disminución del IPC.
+
+Períodos Destacados:
+
+-Desde aproximadamente 1960 hasta 1980, hay picos elevados, lo que plantea periodos de inflación alta o inestabilidad económica.
+
+-Después del año 2000, las fluctuaciones parecen ser menores, con una caída sostenida en el IPC hasta 2020, indicando un período de estabilidad o control inflacionario.
+
+Diferencias entre las series:
+
+-Las desviaciones entre el IPC real y el promedio móvil son mayores en épocas de alta volatilidad. Esto indica que el promedio móvil tiende a suavizar los cambios bruscos, mientras que el IPC muestra las variaciones mensuales más evidentes.
+
+## **Rezago**
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# calculo del rezago
+data$Rezago <- dplyr::lag(data$IPC, n = 12)
+
+
+# Grafica del rezago
+
+g2<-lag.plot(Indice_ts,lag=12, do.lines = FALSE)
+
+ggplotly(g2)
+```
+
+Se puede interpretar que el IPC tiene una autocorrelación significativa en los rezagos más cortos (lag 1, lag 2, etc.), lo que indica que el IPC actual está muy relacionado con los valores recientes. Esta observación es útil para hacer pronósticos a corto plazo, dado que los valores recientes del IPC serán buenos indicadores de los valores futuros.
+
+A medida que el rezago aumenta (lag 6, lag 7, etc.), la dispersión de los puntos es más notable y menos concentrada en una línea recta. Esto puede ocasionar una disminución en la correlación entre el valor actual del IPC y sus valores más antiguos. En términos simples, el comportamiento del IPC hace 6 meses tiene menos influencia en el comportamiento del IPC actual comparado con valores más recientes.
+
+Para los rezagos más largos (como el lag 12), es probable que la relación sea menor, ya que otros factores pueden haber afectado el IPC en ese lapso de tiempo.
+
+## **Descomposición de la serie de tiempo**
+
+```{r}
+ # Graficar la descomposición
+g3<-autoplot(descomposicion) +
+    labs(title = "Descomposición de la Serie de Tiempo IPC",
+         x = "Tiempo", y = "Valor") +
+    theme_minimal()
+ggplotly(g3)
+```
+
+La gráfica muestra la descomposición de una serie de tiempo del Índice de Precios al Consumidor (IPC), dividiéndola en cuatro componentes: tendencia (trend), estacionalidad (seasonal), residuo (remainder) y la serie original (data). Esta gráfica está compuesta por las siguientes partes:
+
+1. Serie Data Original
+Aquí se puede observar cómo ha variado el IPC . Se identifican periodos con picos y valles que indican cuando el IPC fue alto o bajo. Esta línea representa la suma de los componentes de tendencia, estacionalidad y residuo.
+
+2. Tendencia (Trend)
+La tendencia muestra los cambios a largo plazo en el IPC. Si se observa un incremento sostenido, significa que el IPC ha aumentado de manera consistente a lo largo del tiempo, mientras que una tendencia descendente indicaría lo contrario, esto refleja variaciones en la economía.
+
+3. Estacionalidad (Seasonal)
+Representa variaciones que se repiten a intervalos específicos. En esta gráfica, se ve un patrón claro y periódico, lo que sugiere que el IPC tiene un comportamiento cíclico que se repite todos los años o meses. Estos ciclos pueden estar asociados con factores estacionales como festividades, cambios climáticos o eventos recurrentes en la economía.
+
+4. Residuo (Remainder)
+El residuo refleja las fluctuaciones aleatorias y las irregularidades que no se pueden predecir. Si el residuo es pequeño y no muestra patrones obvios, indica que la descomposición ha capturado bien la estructura de la serie. Si, por el contrario, ves variaciones grandes e irregulares, podría significar que hay eventos no explicados que han influido en el IPC en ciertos momentos.
+
+
+
+
+

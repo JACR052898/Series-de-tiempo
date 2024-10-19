@@ -23,7 +23,7 @@
 <meta name="author" content="Jhony Alejandro Cardenas Rojas, Luis Cortés Mojica, Isabel Fernández Acosta" />
 
 
-<meta name="date" content="2024-10-14" />
+<meta name="date" content="2024-10-19" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -52,6 +52,14 @@
 <link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
 <link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
 <script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link href="libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.10.4/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
 
 
 <style type="text/css">
@@ -145,6 +153,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="3" data-path="herramientas-utilizadas.html"><a href="herramientas-utilizadas.html"><i class="fa fa-check"></i><b>3</b> <strong>Herramientas utilizadas</strong></a></li>
 <li class="chapter" data-level="4" data-path="carga-de-los-datos.html"><a href="carga-de-los-datos.html"><i class="fa fa-check"></i><b>4</b> <strong>Carga de los datos</strong></a></li>
 <li class="chapter" data-level="5" data-path="descripción-de-la-base-de-datos.html"><a href="descripción-de-la-base-de-datos.html"><i class="fa fa-check"></i><b>5</b> <strong>Descripción de la base de datos</strong></a></li>
+<li class="chapter" data-level="6" data-path="pre-procesamiento-de-datos.html"><a href="pre-procesamiento-de-datos.html"><i class="fa fa-check"></i><b>6</b> <strong>Pre-procesamiento de datos</strong></a></li>
+<li class="chapter" data-level="7" data-path="visualización-de-la-serie-de-tiempo-y-sus-componentes.html"><a href="visualización-de-la-serie-de-tiempo-y-sus-componentes.html"><i class="fa fa-check"></i><b>7</b> <strong>visualización de la serie de tiempo y sus componentes</strong></a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="visualización-de-la-serie-de-tiempo-y-sus-componentes.html"><a href="visualización-de-la-serie-de-tiempo-y-sus-componentes.html#promedio-móvil"><i class="fa fa-check"></i><b>7.1</b> <strong>Promedio móvil</strong></a></li>
+<li class="chapter" data-level="7.2" data-path="visualización-de-la-serie-de-tiempo-y-sus-componentes.html"><a href="visualización-de-la-serie-de-tiempo-y-sus-componentes.html#rezago"><i class="fa fa-check"></i><b>7.2</b> <strong>Rezago</strong></a></li>
+<li class="chapter" data-level="7.3" data-path="visualización-de-la-serie-de-tiempo-y-sus-componentes.html"><a href="visualización-de-la-serie-de-tiempo-y-sus-componentes.html#descomposición-de-la-serie-de-tiempo"><i class="fa fa-check"></i><b>7.3</b> <strong>Descomposición de la serie de tiempo</strong></a></li>
+</ul></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
 
@@ -168,7 +183,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="header">
 <h1 class="title">Propuesta series de tiempo</h1>
 <p class="author"><em>Jhony Alejandro Cardenas Rojas, Luis Cortés Mojica, Isabel Fernández Acosta</em></p>
-<p class="date"><em>2024-10-14</em></p>
+<p class="date"><em>2024-10-19</em></p>
 </div>
 <div id="propuesta" class="section level1 hasAnchor" number="1">
 <h1><span class="header-section-number">Chapter 1</span> <strong>Propuesta</strong><a href="propuesta.html#propuesta" class="anchor-section" aria-label="Anchor link to header"></a></h1>
